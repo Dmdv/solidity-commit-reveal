@@ -112,5 +112,70 @@ contract Lottery {
         require(!participant.isRevealed, "Number has already been revealed");
         require(block.number >= revealBlockNumber, "Reveal block number has not been reached yet");
         require(keccak256(abi.encodePacked(_number)) == participant.hashedNumber, "Invalid number");
+    }
+```
 
-        participant
+Commit-reveal is a common pattern used in smart contracts to ensure that certain information is kept secret until a specific point in time. Here's an example implementation of commit-reveal in Solidity:
+
+```
+pragma solidity ^0.8.0;
+
+contract CommitReveal {
+    bytes32 public hashedSecret;
+    address public owner;
+    uint public revealDeadline;
+
+    constructor(bytes32 _hashedSecret, uint _revealDeadline) {
+        hashedSecret = _hashedSecret;
+        owner = msg.sender;
+        revealDeadline = _revealDeadline;
+    }
+
+    function commit(bytes32 _hash) public {
+        require(msg.sender == owner, "Only the owner can commit");
+        require(block.timestamp < revealDeadline, "Commit period has ended");
+        hashedSecret = _hash;
+    }
+
+    function reveal(string memory _secret) public {
+        require(keccak256(abi.encodePacked(_secret)) == hashedSecret, "Secret does not match hash");
+        require(block.timestamp >= revealDeadline, "Reveal period has not started yet");
+        // Do something with the revealed secret
+    }
+}
+```
+
+```
+pragma solidity ^0.8.0;
+
+contract CommitReveal {
+    bytes32 public hashedSecret;
+    address public owner;
+    uint public revealDeadline;
+
+    constructor(bytes32 _hashedSecret, uint _revealDeadline) {
+        hashedSecret = _hashedSecret;
+        owner = msg.sender;
+        revealDeadline = _revealDeadline;
+    }
+
+    function commit(bytes32 _hash) public {
+        require(msg.sender == owner, "Only the owner can commit");
+        require(block.timestamp < revealDeadline, "Commit period has ended");
+        hashedSecret = _hash;
+    }
+
+    function reveal(string memory _secret) public {
+        require(keccak256(abi.encodePacked(_secret)) == hashedSecret, "Secret does not match hash");
+        require(block.timestamp >= revealDeadline, "Reveal period has not started yet");
+        // Do something with the revealed secret
+    }
+}
+```
+
+In this example, the contract owner initializes the contract with a hashed secret and a reveal deadline. During the commit period, the owner can update the hashed secret. After the reveal deadline has passed, anyone can call the `reveal` function with the original secret to verify that it matches the hashed secret. If the secret matches, the contract can perform some action with the revealed secret.
+
+Note that this is just a basic example and you may need to modify it to suit your specific use case.
+
+
+
